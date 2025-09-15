@@ -1,4 +1,3 @@
-// components/PropertiesEditor.jsx
 import React from 'react';
 import { Settings, Trash2, Plus } from 'lucide-react';
 import { GRID_OPTIONS } from '../utils/constants';
@@ -51,7 +50,6 @@ const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
       </div>
 
       <div className="space-y-4">
-        {/* Label */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Label</label>
           <input
@@ -62,31 +60,57 @@ const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
           />
         </div>
 
-        {/* Placeholder */}
-        {['text', 'email', 'number', 'phone'].includes(selectedField.type) && (
+        {['text','email','number','phone','textarea'].includes(selectedField.type) && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Placeholder</label>
             <input
               type="text"
-              value={selectedField.placeholder}
+              value={selectedField.placeholder || ''}
               onChange={(e) => handlePropertyChange('placeholder', e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         )}
 
-        {/* Default Value */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Default Value</label>
-          <input
-            type="text"
-            value={selectedField.defaultValue}
-            onChange={(e) => handlePropertyChange('defaultValue', e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+        {selectedField.type === 'textarea' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rows</label>
+            <input
+              type="number"
+              min="2"
+              max="10"
+              value={selectedField.rows || 4}
+              onChange={(e) => handlePropertyChange('rows', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        )}
 
-        {/* Required */}
+        {selectedField.type !== 'checkbox' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Default Value</label>
+            {selectedField.type === 'dropdown' ? (
+              <select
+                value={selectedField.defaultValue || ''}
+                onChange={(e) => handlePropertyChange('defaultValue', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">None</option>
+                {selectedField.options?.map((option, idx) => (
+                  <option key={idx} value={option}>{option}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={selectedField.defaultValue || ''}
+                onChange={(e) => handlePropertyChange('defaultValue', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            )}
+          </div>
+        )}
+
         <div>
           <label className="flex items-center gap-2">
             <input
@@ -99,7 +123,6 @@ const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
           </label>
         </div>
 
-        {/* Grid Span */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Grid Layout</label>
           <select
@@ -113,12 +136,11 @@ const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
           </select>
         </div>
 
-        {/* Options for dropdown, radio, checkbox */}
-        {['dropdown', 'radio', 'checkbox'].includes(selectedField.type) && (
+        {['dropdown','radio','checkbox'].includes(selectedField.type) && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Options</label>
-            <div className="space-y-2">
-              {selectedField.options.map((option, index) => (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {selectedField.options?.map((option, index) => (
                 <div key={index} className="flex gap-2">
                   <input
                     type="text"

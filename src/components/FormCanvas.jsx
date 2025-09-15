@@ -1,8 +1,7 @@
-// components/FormCanvas.jsx
 import React from 'react';
 import { Grid3x3 } from 'lucide-react';
+import useDragAndDrop from '../hooks/useDragAndDrop';
 import FormFieldRenderer from './FormFieldRenderer';
-import { useDragAndDrop } from '../hooks/useDragAndDrop';
 
 const FormCanvas = ({ fields, selectedFieldId, onSelectField, onReorderFields }) => {
   const dragProps = useDragAndDrop(fields, onReorderFields);
@@ -13,7 +12,7 @@ const FormCanvas = ({ fields, selectedFieldId, onSelectField, onReorderFields })
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
           <Grid3x3 size={48} className="mx-auto mb-4 text-gray-300" />
           <h3 className="text-lg font-medium text-gray-500 mb-2">No fields added yet</h3>
-          <p className="text-gray-400">Drag fields from the left panel to start building your form</p>
+          <p className="text-gray-400">Add fields from the left panel or use templates to start building your form</p>
         </div>
       </div>
     );
@@ -26,9 +25,7 @@ const FormCanvas = ({ fields, selectedFieldId, onSelectField, onReorderFields })
           <div
             key={field.id}
             className={`col-span-${field.gridSpan}`}
-            style={{
-              gridColumn: `span ${field.gridSpan} / span ${field.gridSpan}`
-            }}
+            style={{ gridColumn: `span ${field.gridSpan} / span ${field.gridSpan}` }}
           >
             <FormFieldRenderer
               field={field}

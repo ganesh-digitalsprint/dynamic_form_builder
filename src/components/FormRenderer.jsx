@@ -1,13 +1,6 @@
-// components/FormRenderer.jsx
-// Standalone component to render forms from JSON schema
 import React, { useState } from 'react';
 
-const FormRenderer = ({ 
-  schema, 
-  onSubmit, 
-  submitButtonText = 'Submit', 
-  className = '' 
-}) => {
+const FormRenderer = ({ fields, onSubmit, submitButtonText = "Submit Form" }) => {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
 
@@ -15,54 +8,40 @@ const FormRenderer = ({
     setFormData(prev => ({ ...prev, [fieldId]: value }));
     // Clear error when user starts typing
     if (errors[fieldId]) {
-      setErrors(prev => ({ ...prev, [fieldId]: null }));
+      setErrors(prev => ({ ...prev, [fieldId]: '' }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
     
-    schema.fields.forEach(field => {
-      if (field.required && !formData[field.id]) {
-        newErrors[field.id] = `${field.label} is required`;
-      }
-      
-      // Email validation
-      if (field.type === 'email' && formData[field.id]) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData[field.id])) {
-          newErrors[field.id] = 'Please enter a valid email address';
-        }
-      }
-      
-      // Phone validation (basic)
-      if (field.type === 'phone' && formData[field.id]) {
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-        if (!phoneRegex.test(formData[field.id].replace(/\s/g, ''))) {
-          newErrors[field.id] = 'Please enter a valid phone number';
+    fields.forEach(field => {
+      if (field.required) {
+        const value = formData[field.id];
+        
+        if (value === undefined || value === null || value === '') {
+          newErrors[field.id] = `${field.label} is required`;
+        } else if (field.type === 'checkbox' && value.length === 0) {
+          newErrors[field.id] = `${field.label} is required`;
         }
       }
     });
     
-    return newErrors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
     
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+    if (validateForm()) {
+      onSubmit(formData);
     }
-    
-    onSubmit?.(formData);
   };
 
   const renderField = (field) => {
-    const baseClasses = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-      errors[field.id] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-    }`;
+    const baseClasses = "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+    const errorClass = errors[field.id] ? "border-red-500" : "border-gray-300";
     
     switch (field.type) {
       case 'text':
@@ -70,154 +49,135 @@ const FormRenderer = ({
       case 'number':
       case 'phone':
         return (
-          <div>
-            <input
-              type={field.type === 'phone' ? 'tel' : field.type}
-              placeholder={field.placeholder}
-              defaultValue={field.defaultValue}
-              required={field.required}
-              className={baseClasses}
-              onChange={(e) => handleInputChange(field.id, e.target.value)}
-            />
-            {errors[field.id] && (
-              <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-            )}
-          </div>
+          <input
+            type={field.type === 'phone' ? 'tel' : field.type}
+            placeholder={field.placeholder}
+            value={formData[field.id] || field.defaultValue || ''}
+            required={field.required}
+            className={`${baseClasses} ${errorClass}`}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+          />
         );
       
       case 'date':
         return (
-          <div>
-            <input
-              type="date"
-              defaultValue={field.defaultValue}
-              required={field.required}
-              className={baseClasses}
-              onChange={(e) => handleInputChange(field.id, e.target.value)}
-            />
-            {errors[field.id] && (
-              <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-            )}
-          </div>
+          <input
+            type="date"
+            value={formData[field.id] || field.defaultValue || ''}
+            required={field.required}
+            className={`${baseClasses} ${errorClass}`}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+          />
+        );
+      
+      case 'textarea':
+        return (
+          <textarea
+            placeholder={field.placeholder}
+            value={formData[field.id] || field.defaultValue || ''}
+            required={field.required}
+            rows={field.rows || 4}
+            className={`${baseClasses} ${errorClass}`}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+          />
         );
       
       case 'dropdown':
         return (
-          <div>
-            <select 
-              className={baseClasses} 
-              defaultValue={field.defaultValue} 
-              required={field.required}
-              onChange={(e) => handleInputChange(field.id, e.target.value)}
-            >
-              <option value="">Select an option</option>
-              {field.options.map((option, idx) => (
-                <option key={idx} value={option}>{option}</option>
-              ))}
-            </select>
-            {errors[field.id] && (
-              <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-            )}
-          </div>
+          <select 
+            className={`${baseClasses} ${errorClass}`}
+            value={formData[field.id] || field.defaultValue || ''}
+            required={field.required}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
+          >
+            <option value="">Select an option</option>
+            {field.options?.map((option, idx) => (
+              <option key={idx} value={option}>{option}</option>
+            ))}
+          </select>
         );
       
       case 'radio':
         return (
-          <div>
-            <div className="space-y-2">
-              {field.options.map((option, idx) => (
-                <label key={idx} className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={field.id}
-                    value={option}
-                    defaultChecked={field.defaultValue === option}
-                    required={field.required}
-                    onChange={(e) => handleInputChange(field.id, e.target.value)}
-                    className="focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-            {errors[field.id] && (
-              <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-            )}
+          <div className="space-y-2">
+            {field.options?.map((option, idx) => (
+              <label key={idx} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name={field.id}
+                  value={option}
+                  checked={formData[field.id] === option || field.defaultValue === option}
+                  required={field.required}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  className={errorClass}
+                />
+                <span>{option}</span>
+              </label>
+            ))}
           </div>
         );
       
       case 'checkbox':
+        const currentValues = formData[field.id] || [];
         return (
-          <div>
-            <div className="space-y-2">
-              {field.options.map((option, idx) => (
-                <label key={idx} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    value={option}
-                    defaultChecked={field.defaultValue.includes?.(option)}
-                    onChange={(e) => {
-                      const currentValues = formData[field.id] || [];
-                      const newValues = e.target.checked
-                        ? [...currentValues, option]
-                        : currentValues.filter(v => v !== option);
-                      handleInputChange(field.id, newValues);
-                    }}
-                    className="focus:ring-2 focus:ring-blue-500 rounded"
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-            {errors[field.id] && (
-              <p className="text-red-500 text-sm mt-1">{errors[field.id]}</p>
-            )}
+          <div className="space-y-2">
+            {field.options?.map((option, idx) => (
+              <label key={idx} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  value={option}
+                  checked={currentValues.includes(option) || (field.defaultValue || []).includes(option)}
+                  onChange={(e) => {
+                    const newValues = e.target.checked
+                      ? [...currentValues, option]
+                      : currentValues.filter(v => v !== option);
+                    handleInputChange(field.id, newValues);
+                  }}
+                  className={errorClass}
+                />
+                <span>{option}</span>
+              </label>
+            ))}
           </div>
         );
       
       default:
-        return <div className="text-gray-500">Unknown field type: {field.type}</div>;
+        return <div className="text-gray-500">Unknown field type</div>;
     }
   };
 
-  if (!schema || !schema.fields || schema.fields.length === 0) {
-    return (
-      <div className="text-center text-gray-500 p-8">
-        <p>No form schema provided or form is empty</p>
-      </div>
-    );
-  }
-
   return (
-    <div className={`bg-white p-6 rounded-lg shadow-sm ${className}`}>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-12 gap-4">
-          {schema.fields.map((field) => (
-            <div 
-              key={field.id} 
-              className={`col-span-${field.gridSpan}`} 
-              style={{
-                gridColumn: `span ${field.gridSpan} / span ${field.gridSpan}`
-              }}
-            >
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              {renderField(field)}
-            </div>
-          ))}
-        </div>
-        <div className="mt-6">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="grid grid-cols-12 gap-4">
+        {fields.map((field) => (
+          <div 
+            key={field.id} 
+            className={`col-span-${field.gridSpan}`}
+            style={{
+              gridColumn: `span ${field.gridSpan} / span ${field.gridSpan}`
+            }}
           >
-            {submitButtonText}
-          </button>
-        </div>
-      </form>
-    </div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            {renderField(field)}
+            {errors[field.id] && (
+              <p className="text-red-500 text-xs mt-1">{errors[field.id]}</p>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <div className="mt-6">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          {submitButtonText}
+        </button>
+      </div>
+    </form>
   );
 };
 

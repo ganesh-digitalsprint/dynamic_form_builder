@@ -1,24 +1,14 @@
-// components/FormFieldRenderer.jsx
 import React from 'react';
 import { GripVertical } from 'lucide-react';
 
 const FormFieldRenderer = ({ field, index, isSelected, onClick, dragProps }) => {
-  const { 
-    draggedItem, 
-    draggedOverIndex, 
-    handleDragStart, 
-    handleDragOver, 
-    handleDragLeave, 
-    handleDrop, 
-    handleDragEnd 
-  } = dragProps;
-  
+  const { draggedItem, draggedOverIndex, handleDragStart, handleDragOver, handleDragLeave, handleDrop, handleDragEnd } = dragProps;
   const isDragging = draggedItem === index;
   const isDraggedOver = draggedOverIndex === index;
 
+  const baseClasses = "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+
   const renderField = () => {
-    const baseClasses = "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent";
-    
     switch (field.type) {
       case 'text':
       case 'email':
@@ -34,71 +24,59 @@ const FormFieldRenderer = ({ field, index, isSelected, onClick, dragProps }) => 
             readOnly
           />
         );
-      
       case 'date':
         return (
-          <input
-            type="date"
+          <input type="date" defaultValue={field.defaultValue} required={field.required} className={baseClasses} readOnly />
+        );
+      case 'textarea':
+        return (
+          <textarea
+            placeholder={field.placeholder}
             defaultValue={field.defaultValue}
             required={field.required}
+            rows={field.rows || 4}
             className={baseClasses}
             readOnly
           />
         );
-      
       case 'dropdown':
         return (
           <select className={baseClasses} defaultValue={field.defaultValue} required={field.required} disabled>
             <option value="">Select an option</option>
-            {field.options.map((option, idx) => (
+            {field.options?.map((option, idx) => (
               <option key={idx} value={option}>{option}</option>
             ))}
           </select>
         );
-      
       case 'radio':
         return (
-          <div className="space-y-2">
-            {field.options.map((option, idx) => (
+          <div className={`flex ${field.gridSpan >= 6 ? 'flex-row space-x-4' : 'flex-col space-y-2'}`}>
+            {field.options?.map((option, idx) => (
               <label key={idx} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name={field.id}
-                  value={option}
-                  defaultChecked={field.defaultValue === option}
-                  required={field.required}
-                  disabled
-                />
+                <input type="radio" name={field.id} value={option} defaultChecked={field.defaultValue === option} required={field.required} disabled />
                 <span>{option}</span>
               </label>
             ))}
           </div>
         );
-      
       case 'checkbox':
         return (
           <div className="space-y-2">
-            {field.options.map((option, idx) => (
+            {field.options?.map((option, idx) => (
               <label key={idx} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  value={option}
-                  defaultChecked={field.defaultValue.includes?.(option)}
-                  disabled
-                />
+                <input type="checkbox" value={option} defaultChecked={field.defaultValue?.includes?.(option)} disabled />
                 <span>{option}</span>
               </label>
             ))}
           </div>
         );
-      
       default:
         return <div className="text-gray-500">Unknown field type</div>;
     }
   };
 
   return (
-    <div 
+    <div
       className={`p-4 bg-white rounded-lg border-2 transition-all cursor-pointer group ${
         isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
       } ${isDragging ? 'opacity-50' : ''} ${isDraggedOver ? 'border-blue-400 bg-blue-50' : ''}`}

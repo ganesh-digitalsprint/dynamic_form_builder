@@ -1,14 +1,10 @@
-// DynamicFormBuilder.jsx - Complete implementation with all imports
 import React, { useState, useRef } from 'react';
-import { Upload, Download } from 'lucide-react';
-
-// Component imports
+import { Download, Upload } from 'lucide-react';
 import FieldPalette from './components/FieldPalette';
 import FormCanvas from './components/FormCanvas';
 import PropertiesEditor from './components/PropertiesEditor';
 import LivePreview from './components/LivePreview';
-
-// Utility imports
+import { FIELD_TEMPLATES } from './utils/constants';
 import { getDefaultFieldConfig } from './utils/fieldConfig';
 
 const DynamicFormBuilder = () => {
@@ -23,10 +19,18 @@ const DynamicFormBuilder = () => {
     setSelectedFieldId(newField.id);
   };
 
+  const addTemplate = (templateKey) => {
+    const template = FIELD_TEMPLATES[templateKey];
+    const newField = {
+      ...template,
+      id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+    setFields(prev => [...prev, newField]);
+    setSelectedFieldId(newField.id);
+  };
+
   const updateField = (fieldId, updates) => {
-    setFields(prev => prev.map(field => 
-      field.id === fieldId ? { ...field, ...updates } : field
-    ));
+    setFields(prev => prev.map(field => field.id === fieldId ? { ...field, ...updates } : field));
   };
 
   const deleteField = (fieldId) => {
@@ -41,19 +45,16 @@ const DynamicFormBuilder = () => {
       createdAt: new Date().toISOString(),
       version: '1.0'
     };
-    
     const dataStr = JSON.stringify(schema, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = 'form-schema.json';
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const link = document.createElement('a');
+    link.setAttribute('href', dataUri);
+    link.setAttribute('download', 'form-schema.json');
+    link.click();
   };
 
   const importSchema = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files;
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -62,7 +63,7 @@ const DynamicFormBuilder = () => {
           setFields(schema.fields || []);
           setSelectedFieldId(null);
           alert('Form schema imported successfully!');
-        } catch (error) {
+        } catch {
           alert('Error importing schema. Please check the file format.');
         }
       };
@@ -74,7 +75,6 @@ const DynamicFormBuilder = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b px-6 py-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Dynamic Form Builder</h1>
@@ -83,9 +83,7 @@ const DynamicFormBuilder = () => {
               <button
                 onClick={() => setActiveTab('builder')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === 'builder' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                  activeTab === 'builder' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Builder
@@ -93,15 +91,13 @@ const DynamicFormBuilder = () => {
               <button
                 onClick={() => setActiveTab('preview')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === 'preview' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                  activeTab === 'preview' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Preview
               </button>
             </div>
-            
+
             <div className="flex gap-2">
               <input
                 ref={fileInputRef}
@@ -131,11 +127,10 @@ const DynamicFormBuilder = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {activeTab === 'builder' ? (
           <>
-            <FieldPalette onAddField={addField} />
+            <FieldPalette onAddField={addField} onAddTemplate={addTemplate} />
             <FormCanvas
               fields={fields}
               selectedFieldId={selectedFieldId}
