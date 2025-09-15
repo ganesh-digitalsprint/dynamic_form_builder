@@ -1,7 +1,5 @@
-// utils/fieldConfig.js
 import { FIELD_TYPES } from './constants';
 
-// Default field configurations
 export const getDefaultFieldConfig = (type) => {
   const base = {
     id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -19,11 +17,8 @@ export const getDefaultFieldConfig = (type) => {
       return { ...base, options: ['Option 1', 'Option 2', 'Option 3'] };
     case 'checkbox':
       return { ...base, options: ['Choice 1', 'Choice 2'] };
-    case 'text':
-      if (base.label === 'Text Input') {
-        return { ...base, label: 'Nation', defaultValue: 'India' };
-      }
-      return base;
+    case 'textarea':
+      return { ...base, rows: 4 };
     default:
       return base;
   }
