@@ -1,8 +1,9 @@
 import React from 'react';
-import { Settings, Trash2, Plus } from 'lucide-react';
+import { Settings, Trash2, Plus,Copy } from 'lucide-react';
 import { GRID_OPTIONS } from '../utils/constants';
 
-const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
+
+const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField, onDuplicateField }) => {
   if (!selectedField) {
     return (
       <div className="w-80 bg-gray-50 p-4 border-l">
@@ -39,14 +40,21 @@ const PropertiesEditor = ({ selectedField, onUpdateField, onDeleteField }) => {
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-gray-800">Field Properties</h3>
         <div className="flex gap-2">
-          <button
-            onClick={() => onDeleteField(selectedField.id)}
-            className="p-1 text-red-600 hover:bg-red-50 rounded"
-            title="Delete Field"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
+    <button
+      onClick={() => onDuplicateField(selectedField.id)}
+      className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+      title="Duplicate Field"
+    >
+      <Copy size={16} />
+    </button>
+    <button
+      onClick={() => onDeleteField(selectedField.id)}
+      className="p-1 text-red-600 hover:bg-red-50 rounded"
+      title="Delete Field"
+    >
+      <Trash2 size={16} />
+    </button>
+  </div>
       </div>
 
       <div className="space-y-4">

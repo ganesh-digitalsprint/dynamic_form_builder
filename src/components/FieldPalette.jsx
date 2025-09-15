@@ -71,6 +71,9 @@ const FieldPalette = ({ onAddField, onAddTemplate }) => {
                         className="w-full text-left p-2 text-sm bg-white rounded border hover:border-blue-300 hover:bg-blue-50 transition-all"
                       >
                         {template.label}
+                        {
+                          console.log(template,"label")
+                        }
                       </button>
                     ))}
                   </div>
