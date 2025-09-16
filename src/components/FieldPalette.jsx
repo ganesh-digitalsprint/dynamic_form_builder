@@ -9,7 +9,6 @@ const FieldPalette = ({ onAddField, onAddTemplate }) => {
       <div className="p-4 border-b bg-white">
         <h3 className="font-semibold text-gray-800">Form Fields</h3>
       </div>
-
       <div className="flex border-b bg-white">
         <button
           onClick={() => setActiveTab('basic')}

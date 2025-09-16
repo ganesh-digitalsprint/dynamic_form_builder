@@ -70,6 +70,22 @@ const DynamicFormBuilder = () => {
       reader.readAsText(file);
     }
   };
+  const duplicateField = (fieldId) => {
+  setFields((prev) => {
+    const fieldToCopy = prev.find((f) => f.id === fieldId);
+    if (!fieldToCopy) return prev;
+
+    // clone with new id
+    const duplicated = {
+      ...fieldToCopy,
+      id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    return [...prev, duplicated];
+  });
+  setSelectedFieldId(null); // optionally reset selection
+};
+
 
   const selectedField = fields.find(field => field.id === selectedFieldId);
 
@@ -136,11 +152,13 @@ const DynamicFormBuilder = () => {
               selectedFieldId={selectedFieldId}
               onSelectField={setSelectedFieldId}
               onReorderFields={setFields}
+              onDuplicateField={duplicateField}
             />
             <PropertiesEditor
               selectedField={selectedField}
               onUpdateField={updateField}
               onDeleteField={deleteField}
+              onDuplicateField={duplicateField}
             />
           </>
         ) : (
