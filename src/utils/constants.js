@@ -3,6 +3,7 @@ import {
   Circle, List, Phone, User, GraduationCap,
   Home, DollarSign, Users, FileCheck, School
 } from 'lucide-react';
+import { getOptionsFromStorage } from "./localStorageUtils";
 
 export const FIELD_TYPES = {
   text: { icon: Type, label: 'Text Input', component: 'input' },
@@ -20,7 +21,7 @@ export const FIELD_TEMPLATES = {
   title: {
     type: 'dropdown',
     label: 'Title',
-    options: ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.', 'Prof.'],
+    options: getOptionsFromStorage("title", ["Mr.", "Mrs.", "Ms.", "Miss", "Dr.", "Prof."]),
     required: true,
     gridSpan: 4,
     category: 'personal'
@@ -28,7 +29,7 @@ export const FIELD_TEMPLATES = {
   gender: {
     type: 'radio',
     label: 'Gender',
-    options: ['Male', 'Female', 'Non-binary'],
+    options: getOptionsFromStorage("gender", ["Male", "Female", "Non-binary"]),
     required: true,
     gridSpan: 6,
     category: 'personal',
@@ -37,7 +38,7 @@ export const FIELD_TEMPLATES = {
   maritalStatus: {
     type: 'radio',
     label: 'Marital Status',
-    options: ['Married','Un Married'],
+    options: getOptionsFromStorage("maritalStatus", ["Married", "Unmarried"]),
     gridSpan: 6,
     category: 'personal'
   },
